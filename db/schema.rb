@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20161129155523) do
+ActiveRecord::Schema.define(version: 20161207195423) do
 
   create_table "delayed_jobs", force: :cascade do |t|
     t.integer  "priority",   default: 0, null: false
@@ -31,6 +31,17 @@ ActiveRecord::Schema.define(version: 20161129155523) do
     t.integer "planting_area_id"
     t.string  "name"
     t.string  "webcam_url"
+    t.integer "max_log_count",    default: 100
+  end
+
+  create_table "logs", force: :cascade do |t|
+    t.text     "message"
+    t.text     "meta"
+    t.text     "channels"
+    t.integer  "device_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["device_id"], name: "index_logs_on_device_id"
   end
 
   create_table "peripherals", force: :cascade do |t|
@@ -101,6 +112,14 @@ ActiveRecord::Schema.define(version: 20161129155523) do
     t.text    "body"
   end
 
+  create_table "token_expirations", force: :cascade do |t|
+    t.string   "sub"
+    t.integer  "exp"
+    t.string   "jti"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "tool_bays", force: :cascade do |t|
     t.integer  "device_id"
     t.string   "name"
@@ -117,34 +136,34 @@ ActiveRecord::Schema.define(version: 20161129155523) do
     t.integer  "z"
     t.datetime "created_at",  null: false
     t.datetime "updated_at",  null: false
+    t.integer  "tool_id"
     t.index ["tool_bay_id"], name: "index_tool_slots_on_tool_bay_id"
+    t.index ["tool_id"], name: "index_tool_slots_on_tool_id"
   end
 
   create_table "tools", force: :cascade do |t|
-    t.integer  "tool_slot_id"
     t.string   "name"
-    t.datetime "created_at",   null: false
-    t.datetime "updated_at",   null: false
-    t.index ["tool_slot_id"], name: "index_tools_on_tool_slot_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer  "device_id"
+    t.index ["device_id"], name: "index_tools_on_device_id"
   end
 
   create_table "users", force: :cascade do |t|
     t.integer  "device_id"
     t.string   "name"
-    t.string   "email",                  default: "", null: false
-    t.string   "encrypted_password",     default: "", null: false
-    t.string   "reset_password_token"
-    t.datetime "reset_password_sent_at"
-    t.datetime "remember_created_at"
-    t.integer  "sign_in_count",          default: 0,  null: false
+    t.string   "email",              default: "", null: false
+    t.string   "encrypted_password", default: "", null: false
+    t.integer  "sign_in_count",      default: 0,  null: false
     t.datetime "current_sign_in_at"
     t.datetime "last_sign_in_at"
     t.string   "current_sign_in_ip"
     t.string   "last_sign_in_ip"
-    t.datetime "created_at",                          null: false
-    t.datetime "updated_at",                          null: false
+    t.datetime "created_at",                      null: false
+    t.datetime "updated_at",                      null: false
+    t.datetime "verified_at"
+    t.string   "verification_token"
     t.index ["email"], name: "index_users_on_email", unique: true
-    t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
 end

@@ -16,11 +16,6 @@ module Api
       sorry "You need to register a device first.", 422
     end
 
-    rescue_from OnlyJson do |exc|
-      sorry "Requests must be properly formatted type application/json",
-            422
-    end
-
     rescue_from ActiveRecord::RecordNotFound do |exc|
       sorry "Document not found.", 404
     end
@@ -29,11 +24,16 @@ module Api
       render json: {error: exc.message}, status: 422
     end
 
-    rescue_from NoMethodError do |exc|
-      binding.pry
-    end
-
 private
+
+    # TODO: Come back and fix this. Rails 5 params conflict with
+    # the way we do things right now. We used to just use the params
+    # object (it was a hash), but now it is a proper object.
+    def raw_json
+      @raw_json ||= JSON.parse(request.body.read)
+    rescue JSON::ParserError => e
+      raise OnlyJson
+    end
 
     def set_default_response_format
       request.format = "json"

@@ -1,3 +1,11 @@
-RSpec.describe Tool, type: :model do
-  pending "add some examples to (or delete) #{__FILE__}"
+
+describe Tool do
+  describe 'names' do
+    let(:tool) { FactoryGirl.create(:tool) }
+    it 'must be unique' do
+      tool2 = Tool.create(name: tool.name, device: tool.device)
+      expect(tool2.valid?).to be(false)
+      expect(tool2.errors.messages[:name]).to include("has already been taken")
+    end
+  end
 end
