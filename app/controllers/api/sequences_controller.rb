@@ -14,11 +14,11 @@ module Api
     end
 
     def create
-      mutate Sequences::Create.run(sequence_i_guess, device: current_device)
+      mutate Sequences::Create.run(sequence_params, device: current_device)
     end
 
     def update
-      mutate Sequences::Update.run(sequence_i_guess, # params[:sequence].as_json,
+      mutate Sequences::Update.run(sequence_params, # params[:sequence].as_json,
                                    device: current_device,
                                    sequence: sequence)
     end
@@ -32,17 +32,8 @@ module Api
     def maybe_migrate(sequences)
     end
 
-    # TODO: Come back and fix this. Rails 5 has changed the way it handles
-    # params.
-    def sequence_i_guess
-      if @seq_i_guess
-        return @seq_i_guess
-      else
-        js = JSON.parse(request.body.read);
-        @seq_i_guess ||= js["sequence"] || js || {}
-      end
-    rescue JSON::ParserError => e
-      raise OnlyJson
+    def sequence_params
+        @sequence_params ||= raw_json[:sequence] || raw_json || {}
     end
 
     def sequence

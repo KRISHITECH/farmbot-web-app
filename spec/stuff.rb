@@ -1,21 +1,35 @@
+class Hash
+    def traverse(parent=nil, &blk)
+    each do |k, v|
+      Hash === v ? v.traverse(k, &blk) : blk.call([parent, k, v])
+    end
+  end
+end
+
 module Helpers
-  AST_FIXTURE = File.read("./spec/lib/celery_script/ast_fixture3.json").freeze
+  MAGIC_NUMBER_SEQ_ID  = "9999"
+  MAGIC_NUMBER_TOOL_ID = "8888"
+  AST_FIXTURE = File.read("./spec/lib/celery_script/ast_fixture3.json")
 
   # Create a VALID fake sequence.body for a particular user. Creates a fake
   # subsequence in the DB when called.
-  def sequence_body_for(input)
-    body = JSON.parse(AST_FIXTURE)["body"]
-    case input
-    when User; id = FactoryGirl.create(:sequence, device: user.device).id
-    when Sequence; id = input.id
-    else; raise "?????"
+  def sequence_body_for(mystery)
+    case mystery
+    when User
+      device = user.device
+    when Device
+      device = mystery
+    when Sequence
+      device = mystery.device
+    else
+      raise "No #{mystery.class}"
     end
-    body.map! do |node|
-      has_subseq = node.dig("args", "sub_sequence_id");
-      node["args"]["sub_sequence_id"] = id if has_subseq
-      node
-    end
-    body
+    sid = FactoryGirl.create(:sequence, device: device).id
+    tid = FactoryGirl.create(:tool, device: device).id
+    str = AST_FIXTURE
+           .gsub(MAGIC_NUMBER_SEQ_ID, sid.to_s)
+           .gsub(MAGIC_NUMBER_TOOL_ID, tid.to_s)
+    JSON.parse(str)["body"]
   end
 
   def sign_in_as(user)

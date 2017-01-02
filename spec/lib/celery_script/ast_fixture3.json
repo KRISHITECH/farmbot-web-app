@@ -2,15 +2,48 @@
     "kind": "sequence",
     "comment": "Properly formatted, syntactically valid sequence.",
     "args": {
-        "version": 1
+        "version": 3
     },
     "body": [
         {
             "kind": "move_absolute",
             "args": {
-                "x": 1,
-                "y": 2,
-                "z": 3,
+                "location": {
+                    "kind": "coordinate",
+                    "args": {
+                        "x": 1,
+                        "y": 2,
+                        "z": 3
+                    }
+                },
+                "offset": {
+                    "kind": "coordinate",
+                    "args": {
+                        "x": 0,
+                        "y": 0,
+                        "z": 0
+                    }
+                },
+                "speed": 4
+            }
+        },
+        {
+            "kind": "move_absolute",
+            "args": {
+                "location": {
+                    "kind": "tool",
+                    "args": {
+                        "tool_id": 8888
+                    }
+                },
+                "offset": {
+                    "kind": "coordinate",
+                    "args": {
+                        "x": 0,
+                        "y": 0,
+                        "z": 0
+                    }
+                },
                 "speed": 4
             }
         },
@@ -61,18 +94,27 @@
             ]
         },
         {
-            "kind": "if_statement",
+            "kind": "_if",
             "args": {
                 "lhs": "x",
                 "rhs": 300,
                 "op": "is",
-                "sub_sequence_id": 456
+                "_then": {
+                    "kind": "execute",
+                    "args": {
+                        "sub_sequence_id": 9999
+                    }
+                },
+                "_else": {
+                    "kind": "nothing",
+                    "args": {}
+                }
             }
         },
         {
             "kind": "execute",
             "args": {
-                "sub_sequence_id": 123
+                "sub_sequence_id": 9999
             }
         }
     ]
