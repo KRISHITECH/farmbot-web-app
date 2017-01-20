@@ -6,6 +6,7 @@ FarmBot::Application.routes.draw do
     resource :tokens,           only: [:create]
     resource :users,            only: [:create, :update, :destroy]
     resource :device,           only: [:show, :destroy, :create, :update]
+    resources :images,          only: [:create, :destroy, :show, :index]
     resources :plants,          only: [:create, :destroy, :index]
     resources :password_resets, only: [:create, :update]
     resources :regimens,        only: [:create, :destroy, :index, :update]
@@ -16,7 +17,7 @@ FarmBot::Application.routes.draw do
     resources :logs,            only: [:index, :create, :destroy]
     resources :sequences,       only: [:create, :update, :destroy,
                                        :index, :show]
-    resources :schedules,       only: [:create, :update, :destroy,
+    resources :farm_events,       only: [:create, :update, :destroy,
                                        :index]
     resources :tool_slots,      only: [:create, :show, :index,
                                        :destroy, :update]
@@ -28,6 +29,8 @@ FarmBot::Application.routes.draw do
 
   devise_for :users
 
+  # Generate a signed URL for Google Cloud Storage uploads.
+  get "/api/storage_auth" => "api/images#storage_auth", as: :storage_auth
   # You can set FORCE_SSL when you're done.
   get "/.well-known/acme-challenge/:id" => "dashboard#lets_encrypt", as: :lets_encrypt
   # Hacks for HTML5 push state routing:

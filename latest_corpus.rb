@@ -1,11 +1,13 @@
 require "json"
 require "pry"
-require "rails"
+require "rails/all"
+require "open-uri"
 require_relative "./app/lib/celery_script/node_specification"
 require_relative "./app/lib/celery_script/argument_specification"
 require_relative "./app/lib/celery_script/corpus"
 require_relative "./app/lib/sequence_migration"
 require_relative "./app/models/celery_script_settings_bag.rb"
+require_relative "./app/models/sequence.rb"
 Dir["./app/lib/sequence_migration/*.rb"].each {|file| require file }
 
 
@@ -47,7 +49,10 @@ class CSNode
     end
 
     def arg_names
-      allowed_args.map{|x| ARGS[x]}.map(&:to_ts).join("")
+      allowed_args
+         .map{ |x| ARGS[x] }
+         .map(&:to_ts)
+         .join("")
     end
 
     def body_names
@@ -80,7 +85,7 @@ def enum_type(key, val, inspect = true)
   "\nexport type #{key} = #{(inspect ? val.map(&:inspect) : val).join(PIPE)};"
 end
 
-HASH  = JSON.parse(File.read("./latest_corpus.json")).deep_symbolize_keys
+HASH  = JSON.load(open("http://localhost:3000/api/corpuses/3")).deep_symbolize_keys
 ARGS  = {}
 HASH[:args].map{ |x| CSArg.new(x) }.each{|x| ARGS[x.name] = x}
 NODES = HASH[:nodes].map { |x| CSNode.new(x) }
@@ -110,4 +115,9 @@ result.push(enum_type :ALLOWED_DATA_TYPES,
             CeleryScriptSettingsBag::ALLOWED_DATA_TYPES)
 result.push(enum_type :ALLOWED_OPS,
             CeleryScriptSettingsBag::ALLOWED_OPS)
-puts result.join("")
+result.push(enum_type :ALLOWED_PACKAGES,
+            CeleryScriptSettingsBag::ALLOWED_PACKAGES)
+result.push(enum_type :ALLOWED_AXIS, CeleryScriptSettingsBag::ALLOWED_AXIS)
+result.push(enum_type :Color, Sequence::COLORS)
+
+puts result.join

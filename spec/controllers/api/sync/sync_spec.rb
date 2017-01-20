@@ -8,9 +8,9 @@ describe Api::SyncsController do
     it 'downloads a sync object' do
       sign_in user
       device_id = user.device.id
-      sequences = FactoryGirl
-                    .create_list(:sequence, 2, device_id: device_id)
-      schedule_ids = user.device.sequences.map(&:id).sort
+      FactoryGirl.create_list(:sequence, 2, device_id: device_id)
+      FactoryGirl.create_list(:image, 2, device_id: device_id)
+      farm_event_ids = user.device.sequences.map(&:id).sort
 
       get :show
 
@@ -18,7 +18,8 @@ describe Api::SyncsController do
       expect(json).to be_a_kind_of(Hash)
       expect(json[:device][:id]).to eq(device_id)
       expect(json[:sequences].length).to eq(2)
-      expect(json[:sequences].map { |s| s[:id] }.sort).to eq(schedule_ids)
+      expect(json[:sequences].map { |s| s[:id] }.sort).to eq(farm_event_ids)
+      expect(json[:images].first.key?(:attachment_url)).to be_truthy
     end
   end
 end

@@ -1,12 +1,12 @@
-module Schedules
+module FarmEvents
   class Create < Mutations::Command
     using LegacyRefinementsModule
 
     required do
-      model :sequence, class: Sequence
+      # model :sequence, class: Sequence
       model :device, class: Device
       integer :repeat
-      string :time_unit, in: Schedule::UNITS_OF_TIME
+      string :time_unit, in: FarmEvent::UNITS_OF_TIME
     end
 
     optional do
@@ -15,7 +15,8 @@ module Schedules
     end
 
     def execute
-      create(Schedule, inputs) do |sched|
+      Rollbar.info("-- ENDPOINT REQUIRES UPDATES --")
+      create(FarmEvent, inputs) do |sched|
         sched.next_time = sched.calculate_next_occurence
       end
     end

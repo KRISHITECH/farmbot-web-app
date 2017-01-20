@@ -10,13 +10,22 @@ gem "mutations"
 gem "active_model_serializers", "~> 0.8.3"
 gem "ice_cube"
 gem "rack-cors"
-gem "mysql"
 gem "database_cleaner"
-gem "rollbar"
 gem "rack-attack"
+gem "paperclip", "~> 5.0.0"
+gem "delayed_job_active_record"
+gem "figaro"
+gem "fog-google", git: "https://github.com/fog/fog-google"
+gem "rest-client" # If you see this, delete this.
+gem "pg"
+
+# Error reporting tools.
+# Active on the "official" FarmBot server, set the appropriate ENV
+# vars if you wish to use them on your own servers.
+gem "rollbar"
+gem "skylight"
 
 group :development, :test do
-  gem "sqlite3"
   gem "pry"
   gem "factory_girl_rails"
   gem "faker"
@@ -24,14 +33,6 @@ group :development, :test do
   gem "rails-erd"
   gem "rspec"
   gem "rspec-rails"
-end
-
-group :production do
-  # For Heroku users:
-  gem "pg"
-  # For Dokku users:
-  # TODO: Remove MySQL completly and update Dokku deployment instructions.
-  gem "mysql2"
 end
 
 group :test do

@@ -1,5 +1,5 @@
 FactoryGirl.define do
-  factory :schedule do
+  factory :farm_event do
     start_time { Date.yesterday.to_time + 1.minute }
     end_time { Date.today + 1.minute + 2.days }
     time_unit "daily"
@@ -7,8 +7,8 @@ FactoryGirl.define do
     # device
     after(:build) do |s|
       s.next_time ||= s.calculate_next_occurence
-      s.sequence ||= create(:sequence)
-      s.device ||= s.sequence.device
+      s.executable ||= create(:sequence)
+      s.device ||= s.executable.device
     end
   end
 end

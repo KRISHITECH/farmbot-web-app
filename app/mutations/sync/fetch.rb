@@ -24,17 +24,27 @@ module Sync
                tool_bays:     tool_bays,
                tool_slots:    tool_slots,
                tools:         tools,
-               logs:          logs }.as_json
+               logs:          logs,
+               images:        images }.as_json
     end
 
   private
 
+    def images
+      @images ||= ActiveModel::ArraySerializer
+                    .new(Images::Fetch.run!(device: device),
+                         each_serializer: ImageSerializer)
+    end
+
     def tools
-      @tools = Tool.where(device: device)
+      @tools = ActiveModel::ArraySerializer.new(Tool.where(device: device),
+                                                each_serializer: ToolSerializer)
     end
 
     def tool_slots
-      @tool_slots ||= ToolSlot.where(tool_bay_id: tool_bays.pluck(:id))
+      @tool_slots ||= ActiveModel::ArraySerializer
+                        .new(ToolSlot.where(tool_bay_id: tool_bays.pluck(:id)),
+                             each_serializer: ToolSlotSerializer)
     end
 
     def tool_bays
