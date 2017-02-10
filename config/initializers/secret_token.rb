@@ -4,4 +4,10 @@ key = '78d21d901ba79defae9ddf6359eb70c6d8203f7ea7eec3e8f3e3791c6b1fe04a'\
 # Real key for production.
 key = ENV['SECRET_KEY_BASE'] if Rails.env == 'production'
 
+FarmBot::Application.config.secret_token = if Rails.env.development? or Rails.env.test?
+  ('x' * 30) # meets minimum requirement of 30 chars long
+else
+  ENV['SECRET_TOKEN']
+end
+
 FarmBot::Application.config.secret_key_base = key
