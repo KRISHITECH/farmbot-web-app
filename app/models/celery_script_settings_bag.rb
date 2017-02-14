@@ -9,9 +9,10 @@ module CeleryScriptSettingsBag
   ALLOWED_PIN_MODES     = [DIGITAL, ANALOG]
   ALLOWED_RPC_NODES     = %w(home emergency_lock emergency_unlock read_status
                              sync check_updates power_off reboot toggle_pin
-                             start_regimen stop_regimen config_update calibrate
-                             execute move_absolute move_relative write_pin wait
-                             read_pin send_message take_photo factory_reset)
+                             config_update calibrate execute move_absolute
+                             move_relative write_pin wait read_pin send_message
+                             factory_reset execute_script set_user_env
+                             take_photo add_point)
   ALLOWED_PACKAGES      = %w(farmbot_os arduino_firmware)
   ALLOWED_MESSAGE_TYPES = %w(success busy warn error info fun)
   ALLOWED_CHANNEL_NAMES = %w(ticker toast)
@@ -19,7 +20,7 @@ module CeleryScriptSettingsBag
   ALLOWED_OPS           = %w(< > is not)
   ALLOWED_AXIS          = %w(x y z all)
   STEPS                 = %w(move_absolute move_relative write_pin read_pin wait
-                             send_message execute _if)
+                             send_message execute _if execute_script take_photo)
   ALLOWED_LHS           = %w(pin0 pin1 pin2 pin3 pin4 pin5 pin6 pin7 pin8 pin9
                              pin10 pin11 pin12 pin13 x y z)
   BAD_ALLOWED_PIN_MODES = 'Can not put "%s" into a left hand side (LHS) '\
@@ -27,6 +28,7 @@ module CeleryScriptSettingsBag
   BAD_LHS               = 'Can not put "%s" into a left hand side (LHS) '\
                           'argument. Allowed values: %s'
   BAD_SUB_SEQ           = 'Sequence #%s does not exist.'
+  NO_SUB_SEQ            = 'is missing a sequence selection for `execute` block.'
   BAD_REGIMEN           = 'Regimen #%s does not exist.'
   BAD_OP                = 'Can not put "%s" into an operand (OP) argument. '\
                           'Allowed values: %s'
@@ -44,12 +46,12 @@ module CeleryScriptSettingsBag
         end
       end
       .defineArg(:sequence_id, [Fixnum]) do |node|
-        missing = !Sequence.exists?(node.value)
-        node.invalidate!(BAD_SUB_SEQ % [node.value]) if missing
-      end
-      .defineArg(:regimen_id, [Fixnum]) do |node|
-        missing = !Regimen.exists?(node.value)
-        node.invalidate!(BAD_REGIMEN % [node.value]) if missing
+        if (node.value == 0)
+          node.invalidate!(NO_SUB_SEQ)
+        else
+          missing = !Sequence.exists?(node.value)
+          node.invalidate!(BAD_SUB_SEQ % [node.value]) if missing
+        end
       end
       .defineArg(:lhs,             [String]) do |node|
         within(ALLOWED_LHS, node) do |val|
@@ -88,6 +90,7 @@ module CeleryScriptSettingsBag
       .defineArg(:x,               [Fixnum])
       .defineArg(:y,               [Fixnum])
       .defineArg(:z,               [Fixnum])
+      .defineArg(:radius,          [Fixnum])
       .defineArg(:speed,           [Fixnum])
       .defineArg(:pin_number,      [Fixnum])
       .defineArg(:pin_value,       [Fixnum])
@@ -97,7 +100,6 @@ module CeleryScriptSettingsBag
       .defineArg(:label,           [String])
       .defineArg(:package,         [String])
       .defineArg(:message,         [String])
-      .defineArg(:number,          [Fixnum])
       .defineArg(:location,        [:tool, :coordinate])
       .defineArg(:offset,          [:coordinate])
       .defineArg(:_then,           [:execute, :nothing])
@@ -124,17 +126,18 @@ module CeleryScriptSettingsBag
       .defineNode(:power_off,         [], [])
       .defineNode(:reboot,            [], [])
       .defineNode(:toggle_pin,        [:pin_number], [])
-      .defineNode(:start_regimen,     [:regimen_id, :label], [])
-      .defineNode(:stop_regimen,      [:label], [])
       .defineNode(:explanation,       [:message], [])
       .defineNode(:rpc_request,       [:label], ALLOWED_RPC_NODES)
       .defineNode(:rpc_ok,            [:label], [])
       .defineNode(:rpc_error,         [:label], [:explanation])
       .defineNode(:calibrate,         [:axis], [])
-      .defineNode(:pair,              [:label , :value], [])
+      .defineNode(:pair,              [:label, :value], [])
       .defineNode(:config_update,     [:package], [:pair])
-      .defineNode(:take_photo,        [], [])
       .defineNode(:factory_reset,     [], [])
+      .defineNode(:execute_script,    [:label], [:pair])
+      .defineNode(:set_user_env,      [], [:pair])
+      .defineNode(:add_point,         [:location], [:pair])
+      .defineNode(:take_photo,        [], [])
 
   # Given an array of allowed values and a CeleryScript AST node, will DETERMINE
   # if the node contains a legal value. Throws exception and invalidates if not.

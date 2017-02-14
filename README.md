@@ -28,16 +28,25 @@ Your machine will need the following:
  0. [Ruby 2.3.3](http://rvm.io/rvm/install)
 
 ### Setup
- 0. `git clone https://github.com/FarmBot/Farmbot-Web-API farmbot-web-app`
- 0. `cd farmbot-web-app`
+ 0. `git clone https://github.com/FarmBot/Farmbot-Web-API`
+ 0. `cd Farmbot-Web-API`
+ 0. [Install `libpq-dev` and `postgresql`](http://stackoverflow.com/questions/6040583/cant-find-the-libpq-fe-h-header-when-trying-to-install-pg-gem/6040822#6040822)
  0. `bundle install`
  0. Copy `config/database.example.yml` to `config/database.yml`. In GNU/Linux or Mac: `mv config/database.example.yml config/database.yml`.
+ 0. Get permission to create database*
  0. `rake db:create:all db:migrate db:seed`
  0. (optional) Verify installation with `RAILS_ENV=test rake db:create db:migrate && rspec spec`.
  0. `MQTT_HOST=your_mqtt_server_domain rails s`
- 0. (optional) Run `./install_frontend.sh` to install the latest frontend app. You may also run the frontend on a seperate server. See [frontend repository](https://github.com/FarmBot/farmbot-web-frontend) for details.
+ 0. (optional- REQUIRES NODE > v6) Run `./install_frontend.sh` to install the latest frontend app. You may also run the frontend on a seperate server. See [frontend repository](https://github.com/FarmBot/farmbot-web-frontend) for details.
  0. Open [localhost:3000](http://localhost:3000).
- 0. [Raise an issue](https://github.com/FarmBot/farmbot-web-frontend/issues/new?title=Installation%20Failure) if you hit problems with any of these steps.
+ 0. [Raise an issue](https://github.com/FarmBot/Farmbot-Web-API/issues/new?title=Installation%20Failure) if you hit problems with any of these steps.
+
+\*Give permission to `user` to create database:
+```
+sudo -u postgres createuser user
+sudo -u postgres psql
+ALTER USER user WITH SUPERUSER;
+```
 
 # Provisioning Your Own with Dokku
 
@@ -45,7 +54,7 @@ Please see `deployment.md`.
 
 # Config Settings (important)
 
-You're server won't run without setting ENV variables first.
+Your server won't run without setting ENV variables first.
 
 You can accomplish this by setting the ENV variables directly from your shell / server management tool or by writing an `application.yml` file.
 
@@ -108,11 +117,11 @@ $.ajax({
     url: "https://my.farmbot.io/api/tokens",
     type: "POST",
     data: JSON.stringify({user: {email: 'admin@admin.com', password: 'password123'}}),
-    contentType: "application/json"
-})
-.then(function(data){
-  // You can now use your token:
-  var MY_SHINY_TOKEN = data.token.encoded;
+    contentType: "application/json",
+    success: function (data) {
+                 // You can now use your token:
+                 var MY_SHINY_TOKEN = data.token.encoded;
+             }
 });
 ```
 

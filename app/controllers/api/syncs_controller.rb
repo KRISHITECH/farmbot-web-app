@@ -1,6 +1,3 @@
-
-# Generates a tree of all syncable resources. Typically used by a FarmBot device
-# for caching of resources. 
 module Api
   class SyncsController < Api::AbstractController
 

@@ -6,7 +6,7 @@ gem "thin"
 gem "rails_12factor"
 gem "devise"
 gem "jwt"
-gem "mutations"
+gem "mutations", "~> 0.8.0"
 gem "active_model_serializers", "~> 0.8.3"
 gem "ice_cube"
 gem "rack-cors"
@@ -18,6 +18,7 @@ gem "figaro"
 gem "fog-google", git: "https://github.com/fog/fog-google"
 gem "rest-client" # If you see this, delete this.
 gem "pg"
+gem "batch_api"
 
 # Error reporting tools.
 # Active on the "official" FarmBot server, set the appropriate ENV
@@ -33,8 +34,6 @@ group :development, :test do
   gem "rails-erd"
   gem "rspec"
   gem "rspec-rails"
-end
-
-group :test do
   gem "simplecov"
+  gem "letter_opener"
 end

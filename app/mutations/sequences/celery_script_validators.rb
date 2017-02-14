@@ -3,8 +3,23 @@ module Sequences
     NO_TRANSACTION = "You need to do this in a transaction"
     RESOURCES      = { "tool_id"     => Tool,
                        "sequence_id" => Sequence }
+    ALLOWED_NODE_KEYS = [
+      "body",
+      "kind",
+      "args",
+      "comment",
+      :body,
+      :kind,
+      :args,
+      :comment
+    ]
     def validate_sequence
-        add_error :body, :syntax_error, checker.error.message if !checker.valid?
+      # TODO: The code below strips out unneeded attributes, or attributes that
+      # are not part of CeleryScript. We're only stripping attributes out of the
+      # first level, though. I would like to recursively strip out "noise" via
+      # CeleryScript::JSONClimber. I am holding off for now in the name of time.
+      (inputs[:body] || []).map! { |x| x.slice(*ALLOWED_NODE_KEYS) }
+      add_error :body, :syntax_error, checker.error.message if !checker.valid?
     end
 
     def seq

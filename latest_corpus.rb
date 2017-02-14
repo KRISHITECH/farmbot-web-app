@@ -10,7 +10,7 @@ require_relative "./app/models/celery_script_settings_bag.rb"
 require_relative "./app/models/sequence.rb"
 Dir["./app/lib/sequence_migration/*.rb"].each {|file| require file }
 
-
+UNDEFINED = "undefined"
 PIPE = "\n          | "
 
 class CSArg
@@ -51,27 +51,42 @@ class CSNode
     def arg_names
       allowed_args
          .map{ |x| ARGS[x] }
+         .each { |x| raise "NON EXISTANT ARG TYPE" unless x }
          .map(&:to_ts)
          .join("")
     end
 
-    def body_names
-      b = allowed_body_types.map(&:camelize).join(PIPE)
-      (b.length > 0) ? "(#{b})[] | undefined" : "undefined"
+    def items_joined_by_pipe
+      allowed_body_types.map(&:camelize).join(PIPE)
     end
 
-    def args
+    def body_names
+      b = items_joined_by_pipe
+      (b.length > 0) ? "(#{b})[] | undefined" : UNDEFINED
+    end
 
+    def has_body?
+      body_names != UNDEFINED
+    end
+
+    def body_type
+      "export type #{camelize}BodyItem = #{items_joined_by_pipe};" if has_body?
+    end
+
+    def body_attr
+      "body?: #{ has_body? ? (camelize + "BodyItem[] | undefined") : UNDEFINED };"
     end
 
     def to_ts
 """
+#{body_type}
+
 export interface #{camelize} {
   kind: #{name.inspect};
   args: {#{arg_names}
   };
   comment?: string | undefined;
-  body?: #{body_names};
+  #{body_attr}
 }
 """
     end
@@ -119,5 +134,7 @@ result.push(enum_type :ALLOWED_PACKAGES,
             CeleryScriptSettingsBag::ALLOWED_PACKAGES)
 result.push(enum_type :ALLOWED_AXIS, CeleryScriptSettingsBag::ALLOWED_AXIS)
 result.push(enum_type :Color, Sequence::COLORS)
-
-puts result.join
+result.push(enum_type :LegalArgString, HASH[:args].map{ |x| x[:name] }.sort.uniq)
+result.push(enum_type :LegalKindString, HASH[:nodes].map{ |x| x[:name] }.sort.uniq)
+result.push(enum_type :LegalSequenceKind, CeleryScriptSettingsBag::STEPS.sort)
+puts result.join.gsub("\n\n\n", "\n")
