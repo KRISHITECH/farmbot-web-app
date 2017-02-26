@@ -38,13 +38,13 @@ unless Rails.env == "production"
         icon_url: "/icons/Natural Food-96.png",
         openfarm_slug: "tomato")
     end
-    10.times do
+    100.times do
       Point.create(
         device: u.device,
-        x: rand(1...550),
-        y: rand(1...550),
+        x: rand(1...225) + rand(1...225),
+        y: rand(1...225) + rand(1...225),
         z: 5,
-        radius: rand(1...100) * 2,
+        radius: rand(1...150) + rand(1...150),
         meta: { created_by: "plant-detection" })
     end
 
@@ -63,4 +63,15 @@ unless Rails.env == "production"
                          ])
     Peripherals::Create.run!(device:u.device, peripherals: [{pin: 13, label: "LED"}])
     Tools::Create.run!(name: "Trench Digging Tool", device: u.device)
+    5.times do
+      FarmEvents::Create.run!(
+        device: u.device,
+        start_time: Date.yesterday - [*(1..3)].sample.days,
+        end_time: Date.today + ([*(1..3)].sample).days,
+        time_unit: FarmEvent::UNITS_OF_TIME.without("never").sample,
+        repeat: [*(1..3)].sample,
+        executable_id: Sequence.where(device: u.device).order("RANDOM()").first.id,
+        executable_type: "Sequence"
+      )
+    end
 end
