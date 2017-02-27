@@ -3,14 +3,22 @@
 # because they can only perform one sequence. Also unlike Regimens, they can run
 # forever.
 class FarmEvent < ActiveRecord::Base
-  UNITS_OF_TIME      = %w(never minutely hourly daily weekly monthly yearly)
+  NEVER              = :never
+  UNITS_OF_TIME      = %w(never minutely hourly daily
+                          weekly monthly yearly) << NEVER
   EXECUTABLE_CLASSES = [Sequence, Regimen]
   belongs_to :executable, polymorphic: true
   validates :executable, presence: true
   belongs_to :device
   validates :device_id, presence: true
 
+  class NullEventRules
+    def next_occurrence(*)
+    end
+  end
+
   def farm_event_rules
+    return NullEventRules.new if time_unit.to_sym == NEVER
     @farm_event_rules ||= IceCube::Schedule.new(start_time, end_time: end_time) do |sch|
       sch.add_recurrence_rule IceCube::Rule.send(time_unit.to_sym, repeat)
     end

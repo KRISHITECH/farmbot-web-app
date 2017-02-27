@@ -1,4 +1,4 @@
-
+require "spec_helper"
 describe FarmEvent do
   describe '#calculate_next_occurence' do
     let(:farm_event) { FactoryGirl.create(:farm_event) }
