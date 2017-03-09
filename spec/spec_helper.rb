@@ -28,7 +28,8 @@ DatabaseCleaner.strategy = :truncation
 DatabaseCleaner.clean
 
 RSpec.configure do |config|
-
+  config.color = true
+  config.fail_fast = 1
   config.backtrace_exclusion_patterns = [/gems/]
 
   config.include Helpers
@@ -42,26 +43,15 @@ RSpec.configure do |config|
     end
 
     config.after(:suite) do
-      DocGen.finish!#.tap{ |x| binding.pry }
+      DocGen.finish!
       SmarfDoc.finish!
     end
   end
 end
-puts "rspec pid: #{Process.pid}"
 
-trap 'USR1' do
-  threads = Thread.list
-
-  puts
-  puts "=" * 80
-  puts "Received USR1 signal; printing all #{threads.count} thread backtraces."
-
-  threads.each do |thr|
-    description = thr == Thread.main ? "Main thread" : thr.inspect
-    puts
-    puts "#{description} backtrace: "
-    puts thr.backtrace.join("\n")
-  end
-
-  puts "=" * 80
+# Reassign constants without getting a bunch of warnings to STDOUT.
+# This is just for testing purposes, so NBD.
+def const_reassign(target, const, value)
+  target.send(:remove_const, const)
+  target.const_set(const, value)
 end
