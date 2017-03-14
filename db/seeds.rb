@@ -39,7 +39,7 @@ unless Rails.env == "production"
         y: rand(1...550),
         name: Haikunator.haikunate,
         img_url: "http://placehold.it/200x150",
-        icon_url: "/icons/Natural Food-96.png",
+        icon_url: Plant::DEFAULT_ICON,
         openfarm_slug: "tomato")
     end
     100.times do
@@ -48,8 +48,11 @@ unless Rails.env == "production"
         x: rand(1...225) + rand(1...225),
         y: rand(1...225) + rand(1...225),
         z: 5,
-        radius: rand(1...150) + rand(1...150),
-        meta: { created_by: "plant-detection" })
+        radius: (rand(1...150) + rand(1...150)) / 20,
+        meta: {
+          created_by: "plant-detection",
+          color: (Sequence::COLORS + [nil]).sample
+        })
     end
 
     s = Sequences::Create.run!(device: u.device,
